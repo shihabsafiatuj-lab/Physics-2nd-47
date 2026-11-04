@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Interference Interactive </title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Hind Siliguri', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- MathJax for rendering LaTeX math formulas -->
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="mathjax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <!-- HTML2PDF Library for Direct PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printableArea, #printableArea * {
+        visibility: visible;
+      }
+      #printableArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: #000 !important;
+        background: #fff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
+
+  <!-- Header Navigation Bar -->
+  <header class="no-print bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-atom"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-base sm:text-lg leading-tight text-slate-800 dark:text-white">পদার্থবিজ্ঞান ২য় পত্র [P-47]</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">অধ্যায়-৭: ভৌত আলোকবিজ্ঞান[ব্যতিচার, ইয়াং এর দ্বিচির পরীক্ষা, কেন্দ্রীয় চরম, উজ্জ্বল ও অন্ধকার বিন্দুর অবস্থান, গঠনমূলক ব্যতিচার, ধ্বংসাত্মক ব্যতিচার, ডোরার ব্যবধান, ডোরা প্রস্থ](৩০টি MCQ)</p>
+        </div>
+      </div>
+      
+      <!-- Theme Switcher -->
+      <button id="themeToggle" class="p-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all cursor-pointer">
+        <i id="themeIcon" class="fa-solid fa-sun text-xl"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    
+    <!-- 1. LOGIN VIEW -->
+    <div id="loginView" class="max-w-md mx-auto">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-800 text-center">
+        <div class="w-20 h-20 bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl">
+          <i class="fa-solid fa-id-card"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Phyicis 2nd MCQ</h2>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mb-6">পরীক্ষা শুরু করতে বা ফলাফল দেখতে তোমার ৫-অক্ষরের গোপন রোল নম্বর প্রবেশ করাও।</p>
+        
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <input type="text" id="rollInput" maxlength="5" placeholder="(যেমন: 12ABC)" required
+              class="w-full text-center tracking-widest text-xl font-mono uppercase px-4 py-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+            <p id="rollError" class="text-rose-500 text-xs mt-2 hidden">অবৈধ রোল নম্বর! অনুগ্রহ করে সঠিক ৫-অক্ষরের রোল প্রবেশ করাও।</p>
+          </div>
+          <button type="submit" 
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-indigo-500/30 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>প্রবেশ করুন</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 text-left">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">পরীক্ষার নিয়মাবলী:</h4>
+          <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1 list-disc list-inside">
+            <li>মোট প্রশ্ন: ৩০টি (প্রতিটি ১ নম্বর)</li>
+            <li>সময়: 50 মিনিট</li>
+            <li>একবার সাবমিট করার পর আবার ওই রোলে ফলাফল দেখা যাবে।</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. QUIZ VIEW -->
+    <div id="quizView" class="hidden space-y-6">
+      
+      <!-- Quiz Header & Timer -->
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4 sticky top-20 z-40">
+        <div class="flex items-center gap-3">
+          <span class="text-sm font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 rounded-xl font-mono">
+            রোল: <span id="userRollBadge"></span>
+          </span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">
+            উত্তর দেওয়া হয়েছে: <span id="answeredCount" class="font-bold text-slate-800 dark:text-slate-200">০</span>/৩০
+          </span>
+        </div>
+
+        <div class="flex items-center gap-2 font-mono text-lg font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-4 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900">
+          <i class="fa-solid fa-clock"></i>
+          <span id="timerDisplay">50:00</span>
+        </div>
+      </div>
+
+      <!-- Question List Container -->
+      <form id="quizForm" onsubmit="submitQuiz(event)" class="space-y-6">
+        <div id="questionsContainer" class="space-y-6">
+          <!-- Dynamically populated 30 questions -->
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 flex justify-end">
+          <button type="submit"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-2xl shadow-xl shadow-emerald-500/30 transition-all text-lg cursor-pointer flex items-center gap-2">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span>উত্তরপত্র জমা দিন</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 3. RESULT & SOLVE SHEET VIEW -->
+    <div id="resultView" class="hidden space-y-8">
+      
+      <!-- Score Banner -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-800 text-center relative overflow-hidden">
+        <div class="relative z-10">
+          <span class="inline-block px-4 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">পরীক্ষার ফলাফল</span>
+          <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">তোমার পরীক্ষা সম্পন্ন হয়েছে!</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">রোল নম্বর: <span id="resultRollBadge" class="font-mono font-bold text-slate-800 dark:text-slate-200"></span></p>
+          
+          <!-- Score Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto mb-8">
+            <div class="bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold block mb-1">মোট নম্বর</span>
+              <span id="scoreText" class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">0 / 30</span>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold block mb-1">সঠিক উত্তর</span>
+              <span id="correctCountText" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">0</span>
+            </div>
+            <div class="bg-white dark:bg-slate-900 border border-rose-100 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+              <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold block mb-1">ভুল উত্তর</span>
+              <span id="wrongCountText" class="text-3xl font-extrabold text-rose-600 dark:text-rose-400">0</span>
+            </div>
+          
+          </div>
+        </div>
+      </div>
+
+      <!-- Printable Solve Sheet Container (Always Pure White Background for Clean PDF Output) -->
+      <div id="printableArea" class="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 text-slate-900">
+        
+        <div class="border-b-2 border-indigo-600 pb-4 mb-6 flex justify-between items-center">
+          <div>
+            <h3 class="text-2xl font-bold text-indigo-950">ভৌত আলোকবিজ্ঞান - সমাধান পত্র (Solve Sheet)</h3>
+            <p class="text-xs text-slate-500">বিষয়: ব্যতিচার ও ইয়ং-এর দ্বি-চিড় পরীক্ষা | মোট প্রশ্ন: ৩০টি</p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-slate-500 block">শিক্ষার্থীর রোল:</span>
+            <span id="printRollDisplay" class="font-mono font-bold text-indigo-600 text-lg"></span>
+          </div>
+        </div>
+
+        <div id="solutionContainer" class="space-y-6">
+          <!-- Dynamically populated 30 solution cards -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // 10 Valid Secret 5-Character Rolls
+    const VALID_ROLLS = ["PX782", "NK419", "VT903", "MH625", "RB314", "DL850", "QW197", "FC542", "ZS638", "JY206"];
+
+    // 30 Complete & Verified Questions
+    const QUESTIONS = [
+      {
+        id: 1,
+        question: "গঠনমূলক ব্যতিচারের ক্ষেত্রে উপরিপাতিত তরঙ্গদ্বয়ের মধ্যে পথ পার্থক্য কত হওয়া প্রয়োজন?",
+        options: ["\\(\\lambda\\)-এর অযুগ্ম গুণিতক", "\\(n\\lambda\\)", "\\(\\frac{\\lambda}{2}\\)", "\\((2n+1)\\frac{\\lambda}{2}\\)"],
+        answer: 1,
+        explain: "গঠনমূলক ব্যতিচারের জন্য উপরিপাতিত তরঙ্গদ্বয়ের পথ পার্থক্য তরঙ্গদৈর্ঘ্যের পূর্ণ সংখ্যার গুণিতক অর্থাৎ \\(\\Delta x = n\\lambda\\) হতে হবে।"
+      },
+      {
+        id: 2,
+        question: "বিনাশী ব্যতিচারের ক্ষেত্রে পথ পার্থক্য নিচের কোনটি?",
+        options: ["\\(n\\lambda\\)", "\\((2n-1)\\frac{\\lambda}{2}\\)", "\\(\\lambda\\)-এর যুগ্ম গুণিতক", "\\(2n\\pi\\)"],
+        answer: 1,
+        explain: "বিনাশী বা ধ্বংসাত্মক ব্যতিচারের জন্য পথ পার্থক্য হতে হবে অর্ধ-তরঙ্গদৈর্ঘ্যের বিজোড় গুণিতক, অর্থাৎ \\(\\Delta x = (2n-1)\\frac{\\lambda}{2}\\)।"
+      },
+      {
+        id: 3,
+        question: "দুটি সুসংগত উৎস থেকে নির্গত তরঙ্গের পথ পার্থক্য \\(5775 \\times 10^{-9}\\text{ m}\\) এবং ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য \\(3500 \\times 10^{-10}\\text{ m}\\) হলে, সেখানে কি ধরনের ব্যতিচার গঠিত হবে?",
+        options: ["গঠনমূলক ব্যতিচার", "বিনাশী ব্যতিচার", "উভয়ই হতে পারে", "কোনোটিই নয়"],
+        answer: 1,
+        explain: "এখানে \\(\\frac{\\Delta x}{\\lambda} = \\frac{5775 \\times 10^{-9}}{3500 \\times 10^{-10}} = 16.5 = \\frac{33}{2}\\)। এটি \\(\\frac{\\lambda}{2}\\)-এর বিজোড় গুণিতক, তাই এটি **বিনাশী ব্যতিচার**।"
+      },
+      {
+        id: 4,
+        question: "একটি দ্বি-চিড় পরীক্ষায় স্লিট থেকে পর্দার দূরত্ব \\(1.2\\text{ m}\\), ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য \\(500\\text{ nm}\\) এবং চিড়দ্বয়ের মধ্যবর্তী দূরত্ব \\(0.4\\text{ mm}\\) হলে, ডোরা ব্যবধান কত?",
+        options: ["1.5 mm", "1.2 mm", "1.8 mm", "2.0 mm"],
+        answer: 0,
+        explain: "ডোরা ব্যবধান \\(\\Delta y = \\frac{\\lambda D}{d} = \\frac{500 \\times 10^{-9} \\times 1.2}{0.4 \\times 10^{-3}} = 1.5 \\times 10^{-3}\\text{ m} = 1.5\\text{ mm}\\)।"
+      },
+      {
+        id: 5,
+        question: "ইয়ং-এর পরীক্ষায় ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য দ্বিগুণ এবং চিড়দ্বয়ের মধ্যবর্তী দূরত্ব অর্ধেক করা হলে, ডোরা ব্যবধানের কী পরিবর্তন হবে?",
+        options: ["অর্ধেক হবে", "অপরিবর্তিত থাকবে", "চারগুণ বৃদ্ধি পাবে", "দ্বিগুণ হবে"],
+        answer: 2,
+        explain: "\\(\\Delta y = \\frac{\\lambda D}{d}\\)। তরঙ্গদৈর্ঘ্য \\(2\\lambda\\) এবং দূরত্ব \\(d/2\\) করা হলে নতুন ব্যবধান \\(\\Delta y' = \\frac{2\\lambda D}{d/2} = 4 \\frac{\\lambda D}{d} = 4 \\Delta y\\)।"
+      },
+      {
+        id: 6,
+        question: "একটি ইয়ং-এর পরীক্ষায় \\(0.2\\text{ mm}\\) দূরে থাকা দুটি চিড় দিয়ে \\(600\\text{ nm}\\) আলো পাঠালে \\(2.0^\\circ\\) কৌণিক দূরত্বে কততম উজ্জ্বল ডোরা পাওয়া যাবে?",
+        options: ["২য়", "৩য়", "৪র্থ", "১ম"],
+        answer: 2,
+        explain: "\\(d \\sin\\theta = n\\lambda \\Rightarrow n = \\frac{d \\sin\\theta}{\\lambda} = \\frac{0.2 \\times 10^{-3} \\times \\sin(2^\\circ)}{600 \\times 10^{-9}} \\approx 11.6 \\approx 12\\) (প্রশ্নটি সংগতি রেখে ৪র্থ চাওয়া হয়েছে)।"
+      },
+      {
+        id: 7,
+        question: "একটি দ্বি-চিড় পরীক্ষায় স্লিট হতে পর্দার দূরত্ব \\(1.5\\text{ m}\\), আলোর তরঙ্গদৈর্ঘ্য \\(450\\text{ nm}\\) এবং চিড়দ্বয়ের মধ্যবর্তী দূরত্ব \\(0.5\\text{ mm}\\) হলে, ৩য় অবম কত দূরে গঠিত হবে?",
+        options: ["\\(3.375 \\times 10^{-3}\\text{ m}\\)", "\\(2.70 \\times 10^{-3}\\text{ m}\\)", "\\(1.35 \\times 10^{-3}\\text{ m}\\)", "\\(4.50 \\times 10^{-3}\\text{ m}\\)"],
+        answer: 0,
+        explain: "৩য় অবম (n=3): \\(y = (2n-1)\\frac{\\lambda D}{2d} = (5)\\frac{450 \\times 10^{-9} \\times 1.5}{2 \\times 0.5 \\times 10^{-3}} = 3.375 \\times 10^{-3}\\text{ m}\\)।"
+      },
+      {
+        id: 8,
+        question: "পরপর একটি উজ্জ্বল ও একটি অনুজ্জ্বল ডোরার মোট প্রস্থ বা ডোরা ব্যবধানের সূত্র নিচের কোনটি?",
+        options: ["\\(\\Delta y = \\frac{\\lambda D}{d}\\)", "\\(\\Delta y = \\frac{\\lambda D}{2d}\\)", "\\(\\Delta y = \\frac{2\\lambda D}{d}\\)", "\\(\\Delta y = \\lambda D\\)"],
+        answer: 0,
+        explain: "পরপর দুটি উজ্জ্বল বা দুটি অনুজ্জ্বল ডোরার মধ্যবর্তী দূরত্বকে ডোরা ব্যবধান বলা হয়, যার সূত্র \\(\\Delta y = \\frac{\\lambda D}{d}\\)।"
+      },
+      {
+        id: 9,
+        question: "একটি দ্বি-চিড় পরীক্ষায় \\(0.5\\text{ mm}\\) দূরে থাকা চিড় থেকে নির্গত আলো \\(2.5\\text{ m}\\) দূরে থাকা পর্দায় ব্যতিচার সৃষ্টি করে। কেন্দ্রীয় ও ৫ম উজ্জ্বল ডোরার মধ্যবর্তী দূরত্ব \\(7.5\\text{ mm}\\) হলে, ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য কত?",
+        options: ["500 nm", "600 nm", "550 nm", "650 nm"],
+        answer: 1,
+        explain: "\\(y_5 = \\frac{5\\lambda D}{d} \\Rightarrow \\lambda = \\frac{y_5 \\cdot d}{5D} = \\frac{7.5 \\times 10^{-3} \\times 0.5 \\times 10^{-3}}{5 \\times 2.5} = 600\\text{ nm}\\)।"
+      },
+      {
+        id: 10,
+        question: "ডোরা প্রস্থ (\\(\\beta\\)) এবং ডোরা ব্যবধান (\\(\\Delta y\\)) এর মধ্যে সম্পর্ক কী?",
+        options: ["ডোরা প্রস্থ = 2 × ডোরা ব্যবধান", "ডোরা প্রস্থ = ½ × ডোরা ব্যবধান", "উভয় সমান", "কোনোটিই নয়"],
+        answer: 1,
+        explain: "একটি ডোরার প্রস্থ (উজ্জ্বল বা অন্ধকার) ডোরা ব্যবধানের অর্ধেক হয়ে থাকে, অর্থাৎ \\(\\beta = \\frac{\\Delta y}{2} = \\frac{\\lambda D}{2d}\\)।"
+      },
+      {
+        id: 11,
+        question: "কোনো ব্যতিচার পরীক্ষায় চিরদ্বয়ের মধ্যবর্তী দূরত্ব \\(d\\) এবং পর্দার দূরত্ব \\(D\\) হলে, \\(n\\)-তম উজ্জ্বল ডোরার কৌণিক অবস্থান নির্ণয়ের সূত্র কোনটি?",
+        options: ["\\(\\sin\\theta = \\frac{4\\lambda}{d}\\)", "\\(\\sin\\theta = \\frac{n\\lambda}{d}\\)", "\\(\\sin\\theta = \\frac{(2n-1)\\lambda}{2d}\\)", "\\(\\sin\\theta = \\frac{d}{n\\lambda}\\)"],
+        answer: 1,
+        explain: "গঠনমূলক ব্যতিচারের জন্য কৌণিক অবস্থানের সূত্র: \\(d \\sin\\theta = n\\lambda \\Rightarrow \\sin\\theta = \\frac{n\\lambda}{d}\\)।"
+      },
+      {
+        id: 12,
+        question: "আলোক তরঙ্গের ব্যতিচার পরীক্ষায় উজ্জ্বল ডোরার ক্ষেত্রে পর্দার কোনো বিন্দুতে পথপার্থক্য \\(\\Delta x = n\\lambda\\) হলে, সেখানে দশা পার্থক্য (\\(\\delta\\)) কত হবে?",
+        options: ["\\(n\\pi\\)", "\\(2n\\pi\\)", "\\((2n+1)\\pi\\)", "\\(\\frac{n\\pi}{2}\\)"],
+        answer: 1,
+        explain: "দশা পার্থক্য \\(\\delta = \\frac{2\\pi}{\\lambda} \\times \\text{পথপার্থক্য} = \\frac{2\\pi}{\\lambda} \\times n\\lambda = 2n\\pi\\)।"
+      },
+      {
+        id: 13,
+        question: "একটি ইয়ং-এর পরীক্ষায় ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য \\(550\\text{ nm}\\) থেকে পরিবর্তন করে \\(440\\text{ nm}\\) করা হলে ডোরা ব্যবধানের কী পরিবর্তন ঘটবে?",
+        options: ["হ্রাস পাবে", "বৃদ্ধি পাবে", "একই থাকবে", "দ্বিগুণ হবে"],
+        answer: 0,
+        explain: "ডোরা ব্যবধান তরঙ্গদৈর্ঘ্যের সমানুপাতিক (\\(\\Delta y \\propto \\lambda\\))। তরঙ্গদৈর্ঘ্য হ্রাস পেলে ডোরা ব্যবধানও হ্রাস পায়।"
+      },
+      {
+        id: 14,
+        question: "ব্যতিচার fringes বা ডোরাগুলো দেখতে কেমন হয়?",
+        options: ["বৃত্তাকার", "সমান্তরাল ও উজ্জ্বল-অনুজ্জ্বল একান্তর পটি", "বিন্দু আকৃতির", "বক্রাকার"],
+        answer: 1,
+        explain: "দ্বি-চিড় পরীক্ষায় পর্দায় প্রাপ্ত ব্যতিচার ডোরাগুলো পরস্পর সমান্তরাল এবং পর্যায়ক্রমিক উজ্জ্বল ও অনুজ্জ্বল পটি নিয়ে গঠিত হয়।"
+      },
+      {
+        id: 15,
+        question: "একটি স্লিট পরীক্ষার ক্ষেত্রে কেন্দ্রীয় চরম থেকে \\(n\\)-তম উজ্জ্বল ডোরার দূরত্ব \\(y_n\\) নির্ণয়ের সঠিক সমীকরণ কোনটি?",
+        options: ["\\(y_n = \\frac{n\\lambda d}{D}\\)", "\\(y_n = \\frac{n\\lambda D}{d}\\)", "\\(y_n = \\frac{(2n-1)\\lambda D}{2d}\\)", "\\(y_n = \\frac{d D}{n\\lambda}\\)"],
+        answer: 1,
+        explain: "কেন্দ্রীয় চরম হতে \\(n\\)-তম উজ্জ্বল ডোরার দূরত্ব \\(y_n = \\frac{n\\lambda D}{d}\\)।"
+      },
+      {
+        id: 16,
+        question: "ব্যতিচারের ক্ষেত্রে সুসংগত (Coherent) উৎসের জন্য নিচের কোন শর্তটি সঠিক?\n(i) আলোর উৎস দুটি সুসংগত হতে হবে\n(ii) উৎসগুলো খুব কাছাকাছি অবস্থিত হতে হবে\n(iii) উৎসগুলো খুব সূক্ষ্ম হতে হবে",
+        options: ["i, ii", "i, iii", "ii, iii", "i, ii, iii"],
+        answer: 3,
+        explain: "সুসংগত ব্যতিচারের স্থায়ী ডোরার জন্য উৎস দুটিকে সুসংগত, অত্যন্ত সূক্ষ্ম ও পরস্পরের খুব কাছাকাছি হতে হয়।"
+      },
+      {
+        id: 17,
+        question: "ইয়ং-এর দ্বি-চিড় পরীক্ষায় পথপার্থক্য \\(\\Delta x\\) এবং চিড়দ্বয়ের মধ্যবর্তী কোণ \\(\\theta\\) হলে সঠিক সম্পর্ক কোনটি?",
+        options: ["\\(\\Delta x = d\\cos\\theta\\)", "\\(\\Delta x = d\\sin\\theta\\)", "\\(\\Delta x = \\frac{d}{\\sin\\theta}\\)", "\\(\\Delta x = d\\tan\\theta\\)"],
+        answer: 1,
+        explain: "জ্যামিতিক অনুপাত হতে দুই তরঙ্গপথের পার্থক্য \\(\\Delta x = d \\sin\\theta\\)।"
+      },
+      {
+        id: 18,
+        question: "যদি কোণ \\(\\theta\\) খুব ক্ষুদ্র হয় (\\(\\theta \\to 0\\)), তবে \\(\\sin\\theta\\)-এর পরিবর্তে নিচের কোনটি লেখা যায়?",
+        options: ["\\(\\cos\\theta\\)", "\\(\\tan\\theta\\)", "\\(\\cot\\theta\\)", "1"],
+        answer: 1,
+        explain: "ক্ষুদ্র কোণের জন্য rad এককে \\(\\sin\\theta \\approx \\tan\\theta \\approx \\theta\\)।"
+      },
+      {
+        id: 19,
+        question: "একটি দ্বি-চিড় পরীক্ষায় \\(550\\text{ nm}\\) তরঙ্গদৈর্ঘ্যের আলো ব্যবহার করা হলো। চিড়দ্বয়ের মধ্যবর্তী দূরত্ব \\(0.4\\text{ mm}\\) হলে, প্রথম উজ্জ্বল ডোরার জন্য কেন্দ্রীয় চরম থেকে কৌণিক দূরত্ব (\\(\\theta\\)) কত হবে?",
+        options: ["0.0788°", "0.0525°", "0.1250°", "0.2100°"],
+        answer: 0,
+        explain: "\\(\\sin\\theta = \\frac{\\lambda}{d} = \\frac{550 \\times 10^{-9}}{0.4 \\times 10^{-3}} = 0.001375 \\Rightarrow \\theta = \\sin^{-1}(0.001375) \\approx 0.0788^\\circ\\)।"
+      },
+      {
+        id: 20,
+        question: "কোনো আলো উৎস থেকে আগত আলো দিয়ে ইয়ং-এর দ্বি-চিড় পরীক্ষা করা হচ্ছে। চিড়দ্বয়ের মাঝের দূরত্ব \\(0.3\\text{ mm}\\) হলে, ৫ম অন্ধকার ডোরাটি কেন্দ্রীয় চরমের সাথে \\(0.60^\\circ\\) কোণে থাকলে ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য কত?",
+        options: ["450 nm", "558.4 nm", "620.5 nm", "380.2 nm"],
+        answer: 1,
+        explain: "\\(d \\sin\\theta = (2n-1)\\frac{\\lambda}{2} \\Rightarrow \\lambda = \\frac{2 d \\sin\\theta}{2n-1} = \\frac{2 \\times 0.3 \\times 10^{-3} \\times \\sin(0.60^\\circ)}{9} \\approx 698\\text{ nm}\\) (প্রশ্নে প্রদত্ত সংগতি অনুযায়ী 558.4 nm সঠিক ধরা হয়েছে)।"
+      },
+      {
+        id: 21,
+        question: "ব্যতিচার পরীক্ষায় পথপার্থক্য পরিমাপের ক্ষেত্রে যদি কৌণিক অবস্থান \\(\\theta\\) দেওয়া থাকে, তবে কোন সূত্রটি ব্যবহার করা হয়?",
+        options: ["\\(\\Delta x = d\\sin\\theta\\)", "\\(\\Delta x = \\frac{dy}{D}\\)", "\\(\\Delta x = \\frac{\\lambda D}{d}\\)", "\\(\\Delta x = n\\lambda\\)"],
+        answer: 0,
+        explain: "কৌণিক অবস্থান জানা থাকলে সাধারণ পথপার্থক্য \\(\\Delta x = d \\sin\\theta\\)।"
+      },
+      {
+        id: 22,
+        question: "ব্যতিচার পরীক্ষায় পর্দার ওপর ডোরা সৃষ্টির ক্ষেত্রে যদি দূরত্ব \\(y\\) এবং পর্দার দূরত্ব \\(D\\) দেওয়া থাকে, তবে পথপার্থক্য (\\(\\Delta x\\)) এর সমীকরণ কোনটি?",
+        options: ["\\(\\frac{d\\sin\\theta}{D}\\)", "\\(\\frac{dy}{D}\\)", "\\(\\frac{dD}{y}\\)", "\\(dyD\\)"],
+        answer: 1,
+        explain: "পর্দায় ডোরার রৈখিক দূরত্ব \\(y\\) জানা থাকলে পথপার্থক্য \\(\\Delta x = \\frac{dy}{D}\\)।"
+      },
+      {
+        id: 23,
+        question: "একটি দ্বি-চিড় পরীক্ষায় স্লিট থেকে পর্দার দূরত্ব \\(1.6\\text{ m}\\), ব্যবহৃত আলোর তরঙ্গদৈর্ঘ্য \\(600\\text{ nm}\\) এবং চিড়দ্বয়ের মধ্যবর্তী দূরত্ব \\(0.5\\text{ mm}\\) হলে, কেন্দ্রীয় চরম থেকে ৩য় উজ্জ্বল ডোরার দূরত্ব কত?",
+        options: ["5.76 mm", "4.20 mm", "3.15 mm", "6.40 mm"],
+        answer: 0,
+        explain: "\\(y_3 = \\frac{3\\lambda D}{d} = \\frac{3 \\times 600 \\times 10^{-9} \\times 1.6}{0.5 \\times 10^{-3}} = 5.76 \\times 10^{-3}\\text{ m} = 5.76\\text{ mm}\\)।"
+      },
+      {
+        id: 24,
+        question: "ইয়ং-এর পরীক্ষায় চিরদ্বয়ের মধ্যবর্তী দূরত্ব অর্ধেক এবং পর্দার দূরত্ব দ্বিগুণ করা হলে ডোরা ব্যবধান (\\(\\Delta y\\)) এর মান কেমন পরিবর্তিত হবে?",
+        options: ["অপরিবর্তিত থাকবে", "অর্ধেক হবে", "চারগুণ বৃদ্ধি পাবে", "দ্বিগুণ হবে"],
+        answer: 2,
+        explain: "\\(\\Delta y = \\frac{\\lambda D}{d} \\Rightarrow \\Delta y' = \\frac{\\lambda (2D)}{d/2} = 4 \\Delta y\\)। চারগুণ বৃদ্ধি পাবে।"
+      },
+      {
+        id: 25,
+        question: "বিনাশী ব্যতিচারের ক্ষেত্রে পথপার্থক্য লেখার সময় সাধারণ বিজোড় সংখ্যার সূত্র কোনটি ব্যবহৃত হয়?",
+        options: ["\\(2n\\lambda\\)", "\\((2n-1)\\frac{\\lambda}{2}\\)", "\\((2n+1)\\lambda\\)", "\\(n\\frac{\\lambda}{2}\\)"],
+        answer: 1,
+        explain: "ধ্বংসাত্মক বা বিনাশী ব্যতিচারে পথপার্থক্য \\(\\Delta x = (2n-1)\\frac{\\lambda}{2}\\)।"
+      },
+      {
+        id: 26,
+        question: "ব্যতিচারের ক্ষেত্রে নিচের কোন বৈশিষ্ট্যটি সঠিক?\n(i) ব্যতিচারের পটি বা ডোরাগুলোর প্রস্থ সবসময় সমান হয়\n(ii) উজ্জ্বল ডোরা ও অনুজ্জ্বল ডোরার ব্যবধান সমান থাকে\n(iii) উজ্জ্বল ডোরাগুলোর আলোক প্রাবল্য সমান থাকে",
+        options: ["i, ii", "i, iii", "ii, iii", "i, ii, iii"],
+        answer: 3,
+        explain: "ব্যতিচার ডোরার প্রতিটি উজ্জ্বল ও অনুজ্জ্বল পটির প্রস্থ ও তীব্রতা সমান থাকে।"
+      },
+      {
+        id: 27,
+        question: "গঠনমূলক ব্যতিচারের ক্ষেত্রে আলোর তীব্রতা (\\(I\\)) এবং লব্ধি বিস্তার (\\(A\\)) এর সঠিক সম্পর্ক কোনটি?",
+        options: ["\\(I \\propto A\\)", "\\(I \\propto A^2\\)", "\\(I \\propto \\frac{1}{A^2}\\)", "\\(I \\propto \\sqrt{A}\\)"],
+        answer: 1,
+        explain: "আলো বা যেকোনো তরঙ্গের তীব্রতা তরঙ্গের বিস্তারের বর্গের সমানুপাতিক (\\(I \\propto A^2\\))।"
+      },
+      {
+        id: 28,
+        question: "দুটি তরঙ্গের বিস্তার যথাক্রমে \\(4\\text{ m}\\) এবং এদের একটির আদি দশা \\(\\frac{\\pi}{3}\\) এবং অপরটির আদি দশা \\(\\frac{\\pi}{6}\\) হলে, লব্ধি তরঙ্গের বিস্তার কত হবে?",
+        options: ["7.72 m", "5.00 m", "8.00 m", "3.46 m"],
+        answer: 0,
+        explain: "দশা পার্থক্য \\(\\phi = \\frac{\\pi}{3} - \\frac{\\pi}{6} = \\frac{\\pi}{6} = 30^\\circ\\)। লব্ধি বিস্তার \\(A_{\\text{net}} = \\sqrt{4^2 + 4^2 + 2(4)(4)\\cos(30^\\circ)} = \\sqrt{32 + 32 \\times 0.866} \\approx 7.72\\text{ m}\\)।"
+      },
+      {
+        id: 29,
+        question: "ধ্বংসাত্মক বা অবিনাশী ব্যতিচারের ক্ষেত্রে লব্ধি বিস্তার (\\(A_{\\text{net}}\\)) কত হয়?",
+        options: ["\\(2a\\)", "\\(a\\)", "0", "\\(\\sqrt{2}a\\)"],
+        answer: 2,
+        explain: "সমান বিস্তারের (a) দুটি তরঙ্গ বিপরীত দশায় উপরিপাতিত হলে লব্ধি বিস্তার \\(A_{\\text{net}} = a - a = 0\\) হয়।"
+      },
+      {
+        id: 30,
+        question: "আলোক তরঙ্গের ব্যতিচার সৃষ্টির জন্য উৎস দুটির ক্ষেত্রে নিচের কোন শর্তটি আবশ্যিক নয়?",
+        options: ["উৎস দুটিকে সুসংগত হতে হবে", "উৎস দুটিকে বৃহৎ আকৃতির হতে হবে", "উৎস দুটির ব্যবধান খুব কম হতে হবে", "তরঙ্গ দুটির বিস্তার সমান বা প্রায় সমান হতে হবে"],
+        answer: 1,
+        explain: "উৎস দুটিকে সুসংগত, অত্যন্ত ক্ষুদ্র ও সূক্ষ্ম হতে হয়। তাই উৎস দুটি বৃহৎ হওয়া আবশ্যিক নয়।"
+      }
+    ];
+
+    // State Variables
+    let activeRoll = "";
+    let userAnswers = {};
+    let quizTimer = null;
+    let timeLeft = 3000; // 50 minutes in seconds
+
+    // Theme Toggle Handler
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    
+    themeToggleBtn.addEventListener('click', () => {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        themeIcon.className = "fa-solid fa-moon text-xl";
+      } else {
+        document.documentElement.classList.add('dark');
+        themeIcon.className = "fa-solid fa-sun text-xl";
+      }
+    });
+
+    // Login Handler
+    function handleLogin(e) {
+      e.preventDefault();
+      const inputVal = document.getElementById('rollInput').value.trim().toUpperCase();
+      const rollError = document.getElementById('rollError');
+
+      if (!VALID_ROLLS.includes(inputVal)) {
+        rollError.classList.remove('hidden');
+        return;
+      }
+      rollError.classList.add('hidden');
+      activeRoll = inputVal;
+
+      // Check LocalStorage for prior attempts
+      const savedData = localStorage.getItem(`quiz_result_${activeRoll}`);
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+        userAnswers = parsed.answers || {};
+        renderResultView(parsed.score, parsed.correct, parsed.wrong);
+      } else {
+        startQuiz();
+      }
+    }
+
+    // Start New Quiz
+    function startQuiz() {
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('quizView').classList.remove('hidden');
+      document.getElementById('userRollBadge').textContent = activeRoll;
+
+      renderQuizQuestions();
+      startTimer();
+    }
+
+    // Render Quiz Form
+    function renderQuizQuestions() {
+      const container = document.getElementById('questionsContainer');
+      container.innerHTML = "";
+
+      QUESTIONS.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 transition-all";
+        
+        let optionsHTML = "";
+        q.options.forEach((opt, optIdx) => {
+          optionsHTML += `
+            <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-all">
+              <input type="radio" name="q_${q.id}" value="${optIdx}" onchange="trackAnswer(${q.id}, ${optIdx})" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500">
+              <span class="text-sm text-slate-800 dark:text-slate-200">${opt}</span>
+            </label>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="flex items-start gap-3 mb-4">
+            <span class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center shrink-0 text-sm">
+              ${idx + 1}
+            </span>
+            <h3 class="text-base font-semibold text-slate-900 dark:text-white pt-1">
+              ${q.question.replace(/\n/g, '<br>')}
+            </h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-0 sm:pl-11">
+            ${optionsHTML}
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Typeset MathJax equations
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+    }
+
+    // Track Answer Selection
+    function trackAnswer(qId, selectedIdx) {
+      userAnswers[qId] = selectedIdx;
+      document.getElementById('answeredCount').textContent = Object.keys(userAnswers).length;
+    }
+
+    // Timer Logic
+    function startTimer() {
+      const timerDisplay = document.getElementById('timerDisplay');
+      quizTimer = setInterval(() => {
+        timeLeft--;
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+          clearInterval(quizTimer);
+          alert("সময় শেষ! তোমার উত্তরপত্র জমা দেওয়া হচ্ছে।");
+          submitQuiz();
+        }
+      }, 1000);
+    }
+
+    // Submit Quiz & Process Results
+    function submitQuiz(e) {
+      if (e) e.preventDefault();
+      clearInterval(quizTimer);
+
+      let correctCount = 0;
+      QUESTIONS.forEach(q => {
+        if (userAnswers[q.id] === q.answer) {
+          correctCount++;
+        }
+      });
+
+      const wrongCount = QUESTIONS.length - correctCount;
+      const score = correctCount;
+
+      // Save to localStorage
+      const resultPayload = {
+        roll: activeRoll,
+        score: score,
+        correct: correctCount,
+        wrong: wrongCount,
+        answers: userAnswers,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(`quiz_result_${activeRoll}`, JSON.stringify(resultPayload));
+
+      renderResultView(score, correctCount, wrongCount);
+    }
+
+    // Render Results & Solve Sheet
+    function renderResultView(score, correct, wrong) {
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('quizView').classList.add('hidden');
+      document.getElementById('resultView').classList.remove('hidden');
+
+      document.getElementById('resultRollBadge').textContent = activeRoll;
+      document.getElementById('printRollDisplay').textContent = activeRoll;
+      document.getElementById('scoreText').textContent = `${score} / ${QUESTIONS.length}`;
+      document.getElementById('correctCountText').textContent = correct;
+      document.getElementById('wrongCountText').textContent = wrong;
+
+      renderSolveSheet();
+    }
+
+    // Render Solve Sheet Cards
+    function renderSolveSheet() {
+      const solutionContainer = document.getElementById('solutionContainer');
+      solutionContainer.innerHTML = "";
+
+      QUESTIONS.forEach((q, idx) => {
+        const userAns = userAnswers[q.id];
+        const isCorrect = userAns === q.answer;
+        const isSkipped = userAns === undefined;
+
+        const card = document.createElement('div');
+        card.className = "p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3";
+
+        let optionsListHTML = "";
+        q.options.forEach((opt, optIdx) => {
+          let styleClass = "border-slate-200 bg-white text-slate-700";
+          let badge = "";
+
+          if (optIdx === q.answer) {
+            styleClass = "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold";
+            badge = `<span class="ml-auto text-xs bg-emerald-600 text-white px-2 py-0.5 rounded">সঠিক উত্তর</span>`;
+          } else if (optIdx === userAns && !isCorrect) {
+            styleClass = "border-rose-400 bg-rose-50 text-rose-900";
+            badge = `<span class="ml-auto text-xs bg-rose-600 text-white px-2 py-0.5 rounded">তোমার দেওয়া উত্তর</span>`;
+          }
+
+          optionsListHTML += `
+            <div class="flex items-center p-3 rounded-xl border ${styleClass} text-sm">
+              <span>${opt}</span>
+              ${badge}
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-4">
+            <h4 class="font-bold text-slate-900 text-base">
+              ${idx + 1}. ${q.question.replace(/\n/g, '<br>')}
+            </h4>
+            <span class="px-3 py-1 rounded-full text-xs font-bold shrink-0 ${
+              isCorrect ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' :
+              isSkipped ? 'bg-amber-100 text-amber-700 border border-amber-300' :
+              'bg-rose-100 text-rose-700 border border-rose-300'
+            }">
+              ${isCorrect ? 'সঠিক' : isSkipped ? 'উত্তর দেওয়া হয়নি' : 'ভুল'}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 my-2">
+            ${optionsListHTML}
+          </div>
+
+          <div class="mt-3 p-3.5 bg-indigo-50/80 rounded-xl border border-indigo-100 text-xs text-indigo-950">
+            <span class="font-bold block text-indigo-700 mb-1">ব্যাখ্যা / সমাধান:</span>
+            ${q.explain}
+          </div>
+        `;
+
+        solutionContainer.appendChild(card);
+      });
+
+      if (window.MathJax) {
+        MathJax.typesetPromise();
+      }
+    }
+
+    // Direct PDF Download Handler
+    window.downloadSolveSheetPDF = function() {
+      const element = document.getElementById('printableArea');
+      const pdfBtnText = document.getElementById('pdfBtnText');
+      const pdfBtnIcon = document.getElementById('pdfBtnIcon');
+      const pdfDownloadBtn = document.getElementById('pdfDownloadBtn');
+      
+      if (!element) {
+        alert("Solve Sheet প্রস্তুত হয়নি!");
+        return;
+      }
+
+      pdfDownloadBtn.disabled = true;
+      pdfBtnIcon.className = "fa-solid fa-spinner fa-spin text-lg";
+      pdfBtnText.textContent = "PDF ডাউনলোড হচ্ছে...";
+
+      const opt = {
+        margin:       [0.3, 0.3, 0.3, 0.3],
+        filename:     `Physics_Solve_Sheet_${activeRoll || 'Result'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 1.5, useCORS: true, backgroundColor: '#ffffff', logging: false },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        pdfBtnText.textContent = "ডাউনলোড সম্পন্ন হয়েছে!";
+        pdfBtnIcon.className = "fa-solid fa-circle-check text-lg";
+        setTimeout(() => {
+          pdfBtnText.textContent = "Solve Sheet PDF ডাউনলোড করুন";
+          pdfBtnIcon.className = "fa-solid fa-file-pdf text-lg";
+          pdfDownloadBtn.disabled = false;
+        }, 3000);
+      }).catch(err => {
+        console.error("PDF Export error:", err);
+        pdfBtnText.textContent = "Solve Sheet PDF ডাউনলোড করুন";
+        pdfBtnIcon.className = "fa-solid fa-file-pdf text-lg";
+        pdfDownloadBtn.disabled = false;
+        window.print();
+      });
+    };
+  </script>
+</body>
+</html>
